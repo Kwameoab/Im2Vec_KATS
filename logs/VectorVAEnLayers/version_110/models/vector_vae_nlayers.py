@@ -130,7 +130,6 @@ class VectorVAEnLayers(VectorVAE):
         rgb = rgb + inv_mask
         return rgb
 
-
     def decode_and_composite(self, z: Tensor, return_overlap_loss=False, **kwargs):
         bs = z.shape[0]
         layers = []
@@ -264,13 +263,14 @@ class VectorVAEnLayers(VectorVAE):
         return all_interpolations
 
 
-    def save(self, all_points, save_dir, name, verbose=False, white_background=True):
-        # note that this if for a single shape and bs dimension should have multiple curves
-        # print('1:', process.memory_info().rss*1e-6)
+    def save(self, all_points, save_dir, name, verbose=False):
+    # note that this if for a single shape and bs dimension should have multiple curves
+    # print('1:', process.memory_info().rss*1e-6)
+#     self.curves = self.paths
         render_size = self.imsize
         bs = all_points.shape[0]
-        if verbose:
-            render_size = render_size*2
+    #     if verbose:
+    #         render_size = render_size*2
         all_points = all_points*render_size
         num_ctrl_pts = torch.zeros(self.curves, dtype=torch.int32) + 2
 
@@ -278,9 +278,8 @@ class VectorVAEnLayers(VectorVAE):
         shape_groups = []
         for k in range(bs):
             # Get point parameters from network
-            color = make_tensor(color[k])
+            color = make_tensor(self.colors[k])
             points = all_points[k].cpu().contiguous()#[self.sort_idx[k]]
-
             if verbose:
                 np.random.seed(0)
                 colors = np.random.rand(self.curves, 4)
@@ -300,33 +299,36 @@ class VectorVAEnLayers(VectorVAE):
                         curve_points = points[i*3:i*3 + 4]
                     path = pydiffvg.Path(
                         num_control_points=num_ctrl_pts, points=curve_points,
-                        is_closed=False, stroke_width=torch.tensor(4))
+                        is_closed=False, stroke_width=torch.tensor(1))
+                    shapes.append(path)
                     path_group = pydiffvg.ShapeGroup(
-                        shape_ids=torch.tensor([i]),
+                        shape_ids=torch.tensor([len(shapes) - 1]),
                         fill_color=None,
                         stroke_color=color)
-                    shapes.append(path)
                     shape_groups.append(path_group)
                 for i in range(self.curves * 3):
                     scale = diff*(i//3)
                     color = low + scale
                     color[3] = 1
                     color = torch.tensor(color)
+    #                 print(points[i])
                     if i%3==0:
                         # color = torch.tensor(colors[i//3]) #green
-                        shape = pydiffvg.Rect(p_min = points[i]-8,
-                                             p_max = points[i]+8)
-                        group = pydiffvg.ShapeGroup(shape_ids=torch.tensor([self.curves+i]),
-                                                           fill_color=color)
+                        shape = pydiffvg.Rect(p_min = points[i]-2,
+                                            p_max = points[i]+2)
+                        shapes.append(shape)
+                        group = pydiffvg.ShapeGroup(shape_ids=torch.tensor([len(shapes) - 1]),
+                                                        fill_color=color)
+                        shape_groups.append(group)
 
                     else:
-                        # color = torch.tensor(colors[i//3]) #purple
-                        shape = pydiffvg.Circle(radius=torch.tensor(8.0),
-                                                 center=points[i])
-                        group = pydiffvg.ShapeGroup(shape_ids=torch.tensor([self.curves+i]),
-                                                           fill_color=color)
-                    shapes.append(shape)
-                    shape_groups.append(group)
+                    # color = torch.tensor(colors[i//3]) #purple
+                        shape = pydiffvg.Circle(radius=torch.tensor(2.0),
+                                                center=points[i])
+                        shapes.append(shape)
+                        group = pydiffvg.ShapeGroup(shape_ids=torch.tensor([len(shapes) - 1]),
+                                                        fill_color=color)
+                        shape_groups.append(group)
 
             else:
 
@@ -340,5 +342,5 @@ class VectorVAEnLayers(VectorVAE):
                     fill_color=color,
                     stroke_color=color)
                 shape_groups.append(path_group)
-        pydiffvg.save_svg(f"{save_dir}{name}/{name}.svg",
-                          self.imsize, self.imsize, shapes, shape_groups)
+        pydiffvg.save_svg(f"{save_dir}/{name}.svg",
+                        self.imsize, self.imsize, shapes, shape_groups)   

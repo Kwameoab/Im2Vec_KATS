@@ -21,6 +21,8 @@ from PIL import Image
 import glob
 import torch_optimizer as optim_
 
+from genSVG import genSVG
+
 
 
 class ImageFileDataset(datasets.ImageFolder):
@@ -211,20 +213,20 @@ class VAEXperiment(pl.LightningModule):
                               f"{name}_visualize_sampling_vector.png",
                               normalize=False,
                               nrow=self.params['val_batch_size'])
-            interpolate_samples = self.model.naive_vector_interpolate(test_input, verbose=False)
-            interpolate_samples = torch.cat(interpolate_samples, dim=0)
-            vutils.save_image(interpolate_samples.cpu().data,
-                              f"{save_dir}{name}/version_{version}/"
-                              f"{name}_naive_interpolate_image.png",
-                              normalize=False,
-                              nrow=10)
-            interpolate_samples = self.model.naive_vector_interpolate(test_input, verbose=True)
-            interpolate_samples = torch.cat(interpolate_samples, dim=0)
-            vutils.save_image(interpolate_samples.cpu().data,
-                              f"{save_dir}{name}/version_{version}/"
-                              f"{name}_naive_interpolate_vector.png",
-                              normalize=False,
-                              nrow=10)
+            # interpolate_samples = self.model.naive_vector_interpolate(test_input, verbose=False)
+            # interpolate_samples = torch.cat(interpolate_samples, dim=0)
+            # vutils.save_image(interpolate_samples.cpu().data,
+            #                   f"{save_dir}{name}/version_{version}/"
+            #                   f"{name}_naive_interpolate_image.png",
+            #                   normalize=False,
+            #                   nrow=10)
+            # interpolate_samples = self.model.naive_vector_interpolate(test_input, verbose=True)
+            # interpolate_samples = torch.cat(interpolate_samples, dim=0)
+            # vutils.save_image(interpolate_samples.cpu().data,
+            #                   f"{save_dir}{name}/version_{version}/"
+            #                   f"{name}_naive_interpolate_vector.png",
+            #                   normalize=False,
+            #                   nrow=10)
             interpolate_samples = self.model.interpolate(test_input, verbose=True)
             interpolate_samples = torch.cat(interpolate_samples, dim=0)
             vutils.save_image(interpolate_samples.cpu().data,
@@ -249,8 +251,11 @@ class VAEXperiment(pl.LightningModule):
                           f"{name}_input.png",
                           normalize=False,
                           nrow=10)
-        # if save_svg:
-        #     self.model.save(test_input, save_dir, name)
+        
+        print("Saving SVG...")
+        if save_svg:
+            for index, recon in enumerate(recons):
+                genSVG(recon, save_dir + str(index))
 
     def configure_optimizers(self):
 

@@ -281,6 +281,7 @@ class VectorVAE(BaseVAE):
             output_white_bg = output[:, :3, :, :]*alpha + (1-alpha)
             output = torch.cat([output_white_bg, alpha], dim=1)
         del num_ctrl_pts, color
+        
         return output
 
     def decode(self, z: Tensor, point_predictor=None, verbose=False) -> Tensor:

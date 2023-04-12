@@ -10,7 +10,8 @@ model_params:
   learn_sampling: False
   only_auxillary_training: False
   memory_leak_training: False
-  composite_fn: 'hard'
+  other_losses_weight: 0
+  composite_fn: 'soft'
 
 exp_params:
   dataset: irrelavant
@@ -25,7 +26,7 @@ exp_params:
   grow: True
 
 trainer_params:
-  gpus: 1
+  gpus: 0
   max_epochs: 2500
 
 logging_params:

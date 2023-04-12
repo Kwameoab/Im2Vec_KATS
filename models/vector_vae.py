@@ -55,8 +55,12 @@ class VectorVAE(BaseVAE):
 
         if loss_fn == 'BCE':
             self.loss_fn = F.binary_cross_entropy_with_logits
-        else:
+        elif loss_fn == 'MSE':
             self.loss_fn = F.mse_loss
+        elif loss_fn == 'HUBER':
+            self.loss_fn = F.huber_loss
+        else:
+            print("TODO")
         modules = []
         if hidden_dims is None:
             hidden_dims = [32, 64, 128, 256, 512]
@@ -281,6 +285,7 @@ class VectorVAE(BaseVAE):
             output_white_bg = output[:, :3, :, :]*alpha + (1-alpha)
             output = torch.cat([output_white_bg, alpha], dim=1)
         del num_ctrl_pts, color
+
         return output
 
     def decode(self, z: Tensor, point_predictor=None, verbose=False) -> Tensor:

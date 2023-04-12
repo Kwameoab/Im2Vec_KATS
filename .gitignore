@@ -11,3 +11,5 @@ Run.ipynb
 /.idea/modules.xml
 /.idea/vae.iml
 /.idea/vcs.xml
+
+logs/

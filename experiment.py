@@ -249,8 +249,8 @@ class VAEXperiment(pl.LightningModule):
                           f"{name}_input.png",
                           normalize=False,
                           nrow=10)
-        # if save_svg:
-        #     self.model.save(test_input, save_dir, name)
+        if save_svg:
+            self.model.save(test_input, save_dir, name)
 
     def configure_optimizers(self):
 
@@ -274,12 +274,14 @@ class VAEXperiment(pl.LightningModule):
 
         # scheduler = optim.lr_scheduler.ExponentialLR(optims[0],
         #                                              gamma = self.params['scheduler_gamma'], last_epoch=450)
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optims[0], 'min', verbose=True, factor=self.params['scheduler_gamma'], min_lr=0.0001, patience=int(self.model.memory_leak_epochs/7))
+        reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optims[0], 'min', verbose=True, 
+                                                         factor=self.params['scheduler_gamma'], 
+                                                         min_lr=0.0001, patience=int(self.model.memory_leak_epochs/7))
         # scheduler = optim.lr_scheduler.CyclicLR(optims[0], self.params['LR']*0.1, self.params['LR'], mode='exp_range',
         #                                              gamma = self.params['scheduler_gamma'])
         # scheduler = optim.lr_scheduler.OneCycleLR(optims[0], max_lr=self.params['LR'], steps_per_epoch=130, epochs=2000)
-        # scheduler = GradualWarmupScheduler(optims[0], multiplier=1, total_epoch=20,
-        #                                           after_scheduler=scheduler)
+        scheduler = GradualWarmupScheduler(optims[0], multiplier=1, total_epoch=250,
+                                                  after_scheduler=reduce_scheduler)
 
         scheds.append({
          'scheduler': scheduler,
