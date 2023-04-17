@@ -33,5 +33,5 @@ logging_params:
   save_dir: "logs/"
   other_interpolations: True
   name: "VectorVAEnLayers"
-  version: 117
+  version: 119
   manual_seed: 1265

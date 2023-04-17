@@ -254,8 +254,10 @@ class VAEXperiment(pl.LightningModule):
         
         print("Saving SVG...")
         if save_svg:
+            print(f"Would have saved to {save_dir + str(index)}")
             for index, recon in enumerate(recons):
-                genSVG(recon, save_dir + str(index))
+                print(f"Would have saved to {save_dir + str(index)}")
+            #     genSVG(recon, save_dir + str(index))
 
     def configure_optimizers(self):
 

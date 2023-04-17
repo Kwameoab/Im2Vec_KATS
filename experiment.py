@@ -262,6 +262,15 @@ class VAEXperiment(pl.LightningModule):
         optimizer = optim_.Ranger(self.model.parameters(),
                                    lr=self.params['LR'],
                                    weight_decay=self.params['weight_decay'])
+        
+        try:
+            if self.params['optimizer'] == "AdaBelief":
+                optimizer = optim_.AdaBelief(self.model.parameters(),
+                                             lr=self.params['LR'],
+                                             weight_decay=self.params['weight_decay'])
+        except Exception as e:
+            print(f"\nOptimizer not defined using default Ranger\n")
+
         optims.append(optimizer)
         # Check if more than 1 optimizer is required (Used for adversarial training)
         try:
@@ -274,13 +283,15 @@ class VAEXperiment(pl.LightningModule):
 
         # scheduler = optim.lr_scheduler.ExponentialLR(optims[0],
         #                                              gamma = self.params['scheduler_gamma'], last_epoch=450)
+        print(f"\npatience is {int(self.model.memory_leak_epochs/7)}")
         reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optims[0], 'min', verbose=True, 
                                                          factor=self.params['scheduler_gamma'], 
-                                                         min_lr=0.0001, patience=int(self.model.memory_leak_epochs/7))
+                                                        #  min_lr=0.0001, patience=int(self.model.memory_leak_epochs/7))
+                                                        min_lr=0.0001, patience=10)
         # scheduler = optim.lr_scheduler.CyclicLR(optims[0], self.params['LR']*0.1, self.params['LR'], mode='exp_range',
         #                                              gamma = self.params['scheduler_gamma'])
         # scheduler = optim.lr_scheduler.OneCycleLR(optims[0], max_lr=self.params['LR'], steps_per_epoch=130, epochs=2000)
-        scheduler = GradualWarmupScheduler(optims[0], multiplier=1, total_epoch=250,
+        scheduler = GradualWarmupScheduler(optims[0], multiplier=1, total_epoch=100,
                                                   after_scheduler=reduce_scheduler)
 
         scheds.append({

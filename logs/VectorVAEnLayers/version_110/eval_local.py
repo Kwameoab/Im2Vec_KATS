@@ -124,8 +124,8 @@ def decode_and_composite(self, z: Tensor, save_dir, name, return_points=False,**
         shapes.append(shape)
         shape_groups.append(shape_group)
 
-    print(f"Saving {save_dir}/{name}.svg")
-    save_svg(f"{save_dir}/{name}.svg", self.imsize, self.imsize, shapes, shape_groups)    
+    print(f"Saving {save_dir}VectorVAEnLayers/version_110/svgs/{name}.svg")
+    save_svg(f"{save_dir}VectorVAEnLayers/version_110/svgs/{name}.svg", self.imsize, self.imsize, shapes, shape_groups)    
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
